@@ -30,23 +30,49 @@ export default function ProfilePage() {
     coursInscrits: [],
   });
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    setUser({
-      nom: storedUser.nom || '',
-      age: storedUser.age || '',
-      classe: storedUser.classe || '',
-      departement: storedUser.departement || '',
-      formationChoisie: storedUser.formationChoisie || '',
-      coursInscrits: storedUser.coursInscrits || [],
-    });
-  }, []);
+  const [error, setError] = useState<string | null>(null);
 
-  const desinscriptionCours = (cours: string) => {
-    const updatedCourses = user.coursInscrits.filter((c) => c !== cours);
-    const updatedUser = { ...user, coursInscrits: updatedCourses };
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+  useEffect(() => {
+    // Charger les informations de l'utilisateur depuis localStorage
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (storedUser) {
+      setUser({
+        nom: storedUser.nom || '',
+        age: storedUser.age || '',
+        classe: storedUser.classe || '',
+        departement: storedUser.departement || '',
+        formationChoisie: storedUser.formationChoisie || '',
+        coursInscrits: storedUser.coursInscrits || [],
+      });
+    }
+  }, []);  // Cela se lance au premier rendu, après le montage du composant
+
+  // Désinscription d'un cours
+  const desinscriptionCours = async (cours: string) => {
+    try {
+      const updatedCourses = user.coursInscrits.filter((c) => c !== cours);
+      const updatedUser = { ...user, coursInscrits: updatedCourses };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Appeler l'API pour mettre à jour les cours inscrits sur le serveur
+      const response = await fetch('/api/update-courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ coursInscrits: updatedCourses }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour des cours');
+      }
+    } catch (error) {
+      setError('Une erreur est survenue lors de la désinscription.');
+      console.error('Erreur lors de la désinscription du cours:', error);
+    }
   };
 
   return (
@@ -96,6 +122,7 @@ export default function ProfilePage() {
                         <button
                           onClick={() => desinscriptionCours(cours)}
                           className="ml-1 text-blue-800 hover:text-red-700"
+                          aria-label={`Désinscrire du cours ${cours}`}
                         >
                           ×
                         </button>
@@ -109,6 +136,9 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Affichage des erreurs */}
+        {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
       </div>
     </div>
   );

@@ -65,7 +65,12 @@ const SignupForm = () => {
       console.log('Réponse API:', data);
 
       if (!response.ok) {
-        throw new Error(data.detail || `Erreur HTTP ${response.status}`);
+        throw new Error(
+          typeof data.detail === 'string'
+            ? data.detail
+            : JSON.stringify(data.detail || `Erreur HTTP ${response.status}`)
+        );
+        
       }
 
       setMessage('Inscription réussie ! Redirection...');
