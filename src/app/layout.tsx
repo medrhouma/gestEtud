@@ -75,6 +75,25 @@ export default function RootLayout({
                 </svg>
                 Favoris
               </Link>
+
+              {/* Nouveau lien Recommandations */}
+              <Link href="/recommandation" className={navLinkClass('/recommandation')}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 17v-6a2 2 0 012-2h6M15 15l6-6m0 0l-6-6m6 6H9"
+                  />
+                </svg>
+                Recommandations
+              </Link>
             </div>
 
             <div className="flex space-x-6">
